@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import re
-# import sys
 import urllib
 import urllib2
 
 import _mysql_exceptions
-
-# reload(sys)
-# sys.setdefaultencoding('utf8')
 
 from webparser import TopicParser
 

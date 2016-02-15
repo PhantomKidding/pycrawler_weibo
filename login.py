@@ -3,10 +3,10 @@
 import cookielib
 import json
 import re
-import urllib2, time
+import time
+import urllib2
 
 import login_encode
-from bs4 import BeautifulSoup
 
 
 class WeiboLogin:
@@ -14,7 +14,6 @@ class WeiboLogin:
     def __init__(self, username, password, proxy=''):
         self._username = username
         self._password = password
-        # self._nick = nick
         self._proxy = proxy
 
         self._serverUrl = 'http://login.sina.com.cn/sso/prelogin.php?' \
@@ -29,18 +28,6 @@ class WeiboLogin:
         self._pubkey = ''
         self._rsakv = ''
         self._redirectLoginUrl = ''
-
-    # create a cookie
-    def enableCookie(self, proxy):
-        cookieJar = cookielib.LWPCookieJar()  # build cookie
-        cookieSupport = urllib2.HTTPCookieProcessor(cookieJar)
-        if proxy == '':
-            opener = urllib2.build_opener(cookieSupport, urllib2.HTTPHandler)
-        else:
-            proxySupport = urllib2.ProxyHandler({'http': proxy})  # 使用代理
-            opener = urllib2.build_opener(proxySupport, cookieSupport, urllib2.HTTPHandler)
-            print 'Proxy ', proxy,  ' enabled.'
-        urllib2.install_opener(opener)
 
     # get server time and nonce
     def getServerData(self):
@@ -60,17 +47,11 @@ class WeiboLogin:
             print u"\t失败."
             return None
 
-    # Login中解析重定位结果部分函数
-    def getRedirectLoginUrl(self, text):
-        p = re.compile('location\.replace\([\'"](.*?)[\'"]\)')
-        loginUrl = p.search(text).group(1)
-        return loginUrl
-
     def tryLogin(self):
-        if self.isLoggedIn():
+        if isLoggedIn():
             print u'\t已登录!'
         else:
-            self.enableCookie(self._proxy)
+            enableCookie(self._proxy)
             self._servertime, self._nonce, self._pubkey, self._rsakv = self.getServerData()
             postData = login_encode.postEncode(self._username,
                                                self._password,
@@ -84,9 +65,9 @@ class WeiboLogin:
             text = result.read()  # 读取内容
 
             try:
-                self._redirectLoginUrl = self.getRedirectLoginUrl(text)  # 得到重定位信息后，解析得到最终跳转到的URL
+                self._redirectLoginUrl = getRedirectLoginUrl(text)  # 得到重定位信息后，解析得到最终跳转到的URL
                 urllib2.urlopen(self._redirectLoginUrl)  # 打开该URL后，服务器自动将用户登陆信息写入cookie，登陆成功
-                return True if self.isRedirectLoginUrl(self._redirectLoginUrl) else False
+                return True if isRedirectLoginUrl(self._redirectLoginUrl) else False
             except:
                 return False
 
@@ -100,25 +81,39 @@ class WeiboLogin:
         time.sleep(1)
         print '3'
 
-    def isRedirectLoginUrl(self, redirectLoginUrl):
-        p = re.compile('retcode=[0-9]+')
-        m = p.findall(redirectLoginUrl)
-        if 'retcode=0' in m:
-            return True
-        else:
-            print m
-            return False
 
-    def isLoggedIn(self):
-        mainPage = 'http://s.weibo.com/'
-        html = urllib2.urlopen(mainPage).read()
+# create a cookie
+def enableCookie(proxy):
+    cookieJar = cookielib.LWPCookieJar()  # build cookie
+    cookieSupport = urllib2.HTTPCookieProcessor(cookieJar)
+    if proxy == '':
+        opener = urllib2.build_opener(cookieSupport, urllib2.HTTPHandler)
+    else:
+        proxySupport = urllib2.ProxyHandler({'http': proxy})  # 使用代理
+        opener = urllib2.build_opener(proxySupport, cookieSupport, urllib2.HTTPHandler)
+        print 'Proxy ', proxy,  ' enabled.'
+    urllib2.install_opener(opener)
 
-        # if self._nick == '':
-        p = re.compile('\$CONFIG\[\'islogin\'\] = \'([0-9])\'')
-        return p.search(html).group(1) == '1'
-        # else:
-        #     try:
-        #         p = re.compile('\$CONFIG\[\'nick\'\] = \'(.+?)\'')
-        #         return p.search(html).group(1) == self._nick
-        #     except:
-        #         return False
+
+# Login中解析重定位结果部分函数
+def getRedirectLoginUrl(text):
+    p = re.compile('location\.replace\([\'"](.*?)[\'"]\)')
+    loginUrl = p.search(text).group(1)
+    return loginUrl
+
+
+def isRedirectLoginUrl(redirectLoginUrl):
+    p = re.compile('retcode=[0-9]+')
+    m = p.findall(redirectLoginUrl)
+    if 'retcode=0' in m:
+        return True
+    else:
+        print m
+        return False
+
+
+def isLoggedIn():
+    mainPage = 'http://s.weibo.com/'
+    html = urllib2.urlopen(mainPage).read()
+    p = re.compile('\$CONFIG\[\'islogin\'\] = \'([0-9])\'')
+    return p.search(html).group(1) == '1'
