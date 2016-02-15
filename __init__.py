@@ -13,8 +13,7 @@ if __name__ == '__main__':
     from login import WeiboLogin
 
     username = 'cchenapp@gmail.com'  # '虫洞探索者'
-    # pwd = raw_input('请输入微博密码 >')
-    pwd = 'Cc19900201'
+    pwd = raw_input('请输入微博密码 >')
     keyword = '#谷歌#'
 
     WeiboLogin(username, pwd).login()
