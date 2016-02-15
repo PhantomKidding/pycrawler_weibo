@@ -51,7 +51,7 @@ class WeiboCrawler:
     def _crawl_unlimited(self):
         page = 1
         while self.hasResult:
-            downloader = WeiboDownloader(self._keyword, page, self._conn).load().retrieve()
+            downloader = WeiboDownloader(self._keyword, page, self._conn, self._htmlOutputDir).load().retrieve()
             self.hasResult = downloader.hasResult
             page += 1
             if self.hasResult:
@@ -59,7 +59,7 @@ class WeiboCrawler:
 
     def _crawl_pages(self):
         for page in self._pages:
-            downloader = WeiboDownloader(self._keyword, page, self._conn).load().retrieve()
+            downloader = WeiboDownloader(self._keyword, page, self._conn, self._htmlOutputDir).load().retrieve()
             self.hasResult = downloader.hasResult
             if self.hasResult:
                 sleep()

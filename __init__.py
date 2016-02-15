@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ['WeiboLogin', 'WeiboDownloader', 'WeiboCrawler']
+__all__ = ['WeiboLogin', 'WeiboDownloader', 'WeiboCrawler', 'TopicParser']
 
 __author__ = 'Cheng Chen'
 __email__ = 'cchen224@uic.edu'
@@ -13,9 +13,10 @@ if __name__ == '__main__':
     from login import WeiboLogin
 
     username = 'cchenapp@gmail.com'  # '虫洞探索者'
-    pwd = raw_input('请输入微博密码 >')
-    keyword = '#百度#'
+    # pwd = raw_input('请输入微博密码 >')
+    pwd = 'Cc19900201'
+    keyword = '#谷歌#'
 
     WeiboLogin(username, pwd).login()
-    WeiboCrawler(keyword, isConnectMySQL=True).crawl()
+    WeiboCrawler(keyword, pages=range(29,52), isConnectMySQL=True, htmlOutputDir='/Users/cchen224/Downloads/weibo').crawl()
     print 'Finally!!'
