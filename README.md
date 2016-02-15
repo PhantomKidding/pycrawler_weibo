@@ -16,4 +16,5 @@ This library is written for crawling Sina Weibo due to unfriendly Sina API.
     - setup MySQL (MySQL)
   2. Go to working directory in terminal  
     `cd ~/...`
-  3. `python __init__.py`
+  3. Run __init__.py  
+    `python __init__.py`
