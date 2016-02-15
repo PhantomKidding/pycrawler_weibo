@@ -17,5 +17,5 @@ if __name__ == '__main__':
     keyword = '#谷歌#'
 
     WeiboLogin(username, pwd).login()
-    WeiboCrawler(keyword, pages=range(29,52), isConnectMySQL=True, htmlOutputDir='/Users/cchen224/Downloads/weibo').crawl()
+    WeiboCrawler(keyword, pages=range(0,51), isConnectMySQL=True, htmlOutputDir='/Users/cchen224/Downloads/weibo').crawl()
     print 'Finally!!'
