@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
-
 __all__ = ['WeiboLogin', 'WeiboDownloader', 'WeiboCrawler']
+
+__author__ = 'Cheng Chen'
+__email__ = 'cchen224@uic.edu'
+__date__ = '20160214'
+
 
 
 if __name__ == '__main__':
