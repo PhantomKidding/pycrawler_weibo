@@ -1,5 +1,6 @@
 # pycrawler_weibo
-This library is written for crawling Sina Weibo due to unfriendly Sina API.
+This library is written for crawling Sina Weibo due to extremely unfriendly Sina API.
+At the time, pycrawler_weibo only supports crawling on searching certain keyword.
 
 ##Prerequisite
   - Python 2.7
@@ -18,3 +19,9 @@ This library is written for crawling Sina Weibo due to unfriendly Sina API.
     `cd ~/...`
   3. Run \_\_init\_\_.py  
     `python __init__.py`
+
+## Clases
+class  WeiboCrawler(isConnectMySQL=True, htmlOutputDir='')
+  .search(keyword, pages=range(1, 51)
+    @param keyword: (str/list) search keyword
+    @param pages:   (int/list) pages of search 
