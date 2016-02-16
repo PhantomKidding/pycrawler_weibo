@@ -3,10 +3,8 @@ This library is written for crawling Sina Weibo due to extremely unfriendly Sina
 At the time, pycrawler_weibo only supports crawling on searching certain keyword.
 
 ### Prerequisite
-  - Python 2.7
-    - https://www.python.org/downloads/
-  - Beautifulsoup4
-    - http://www.crummy.com/software/BeautifulSoup/bs4/
+  - [Python 2.7] (https://www.python.org/downloads/)
+  - [Beautifulsoup4] (http://www.crummy.com/software/BeautifulSoup/bs4/)
     - `pip install beautifulsoup4`
   - MySQL-python (option)
     - `pip install mysql-python`
