@@ -10,12 +10,12 @@ At the time, pycrawler_weibo only supports crawling on searching certain keyword
     - `pip install mysql-python`
 
 ### Simple Usage
-  1. Open \_\_init\_\_.py and
+  1. Open test.py and
     - edit login information and topic/mention
-    - setup MySQL (MySQL)
+    - setup MySQL *(option)*
   2. Go to working directory in terminal  
     `cd ~/...`
-  3. Run \_\_init\_\_.py  
+  3. Run test.py  
     `python __init__.py`
 
 ### Clases
