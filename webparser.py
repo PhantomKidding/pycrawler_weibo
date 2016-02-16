@@ -90,7 +90,7 @@ class SearchParser:
             except _mysql_exceptions.IntegrityError:
                 print '\t微博' + weibo['mid'] + '已存在.'
             except _mysql_exceptions.ProgrammingError:
+                print 'SQL command error: '
                 print command_insert
-                print 'SQL command error'
         conn.commit()
         return self
