@@ -9,14 +9,14 @@ At the time, pycrawler_weibo only supports crawling on searching certain keyword
   - [MySQL-python] (http://mysql-python.sourceforge.net/) *(option)*
     - `pip install mysql-python`
 
-### Simple Usage
+### Simple Usage in Terminal
   1. Open test.py and
     - edit login information and topic/mention
     - setup MySQL *(option)*
   2. Go to working directory in terminal  
     `cd ~/...`
   3. Run test.py  
-    `python __init__.py`
+    `python test.py`
 
 ### Clases
 - *class* WeiboCrawler(isConnectMySQL=True, htmlOutputDir='')
