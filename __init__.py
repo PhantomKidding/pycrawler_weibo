@@ -17,5 +17,5 @@ if __name__ == '__main__':
     keywords = raw_input('请输入查询关键词 >')
 
     WeiboLogin(username, pwd).login()
-    WeiboCrawler(isConnectMySQL=True, htmlOutputDir='/Users/cchen224/Downloads/weibo').search(keywords, pages=[1, 2])
+    WeiboCrawler(isConnectMySQL=True, htmlOutputDir='/Users/cchen224/Downloads/weibo').search(keywords)
     print 'Finally!!'
