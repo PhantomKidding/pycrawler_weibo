@@ -6,7 +6,7 @@ At the time, pycrawler_weibo only supports crawling on searching certain keyword
   - [Python 2.7] (https://www.python.org/downloads/)
   - [Beautifulsoup4] (http://www.crummy.com/software/BeautifulSoup/bs4/)
     - `pip install beautifulsoup4`
-  - MySQL-python (option)
+  - [MySQL-python] (http://mysql-python.sourceforge.net/) *(option)*
     - `pip install mysql-python`
 
 ### Simple Usage
