@@ -2,16 +2,19 @@
 
 import cookielib
 import json
+import logging
 import re
 import time
 import urllib2
 
-import login_encode
+from login_encode import post_encode
 
 
 class WeiboLogin:
+    LOGGER = logging.getLogger('login')
 
     def __init__(self, username, password, proxy=''):
+
         self._username = username
         self._password = password
         self._proxy = proxy
@@ -30,7 +33,8 @@ class WeiboLogin:
         self._redirectLoginUrl = ''
 
     # get server time and nonce
-    def getServerData(self):
+    def get_server_data(self):
+        self.LOGGER.info(u'正在登录微博...')
         print u'正在登录微博...',
         serverData = urllib2.urlopen(self._serverUrl).read()   # 获取网页内容
         try:
@@ -47,18 +51,18 @@ class WeiboLogin:
             print u"\t失败."
             return None
 
-    def tryLogin(self):
+    def try_login(self):
         if isLoggedIn():
             print u'\t已登录!'
         else:
             enableCookie(self._proxy)
-            self._servertime, self._nonce, self._pubkey, self._rsakv = self.getServerData()
-            postData = login_encode.postEncode(self._username,
-                                               self._password,
-                                               self._servertime,
-                                               self._nonce,
-                                               self._pubkey,
-                                               self._rsakv)
+            self._servertime, self._nonce, self._pubkey, self._rsakv = self.get_server_data()
+            postData = post_encode(self._username,
+                                   self._password,
+                                   self._servertime,
+                                   self._nonce,
+                                   self._pubkey,
+                                   self._rsakv)
             # print "Getting postData success"
             req = urllib2.Request(self._loginUrl, postData, self._postHeader)   # 封装请求信息
             result = urllib2.urlopen(req)  # 登录第二步向self.loginUrl发送用户和密码
@@ -72,7 +76,7 @@ class WeiboLogin:
                 return False
 
     def login(self):
-        print '\t登陆成功!\n' if self.tryLogin() else '\t登陆失败. T T'
+        print '\t登陆成功!\n' if self.try_login() else '\t登陆失败. T T'
         print '3秒后开始搜索...',
         time.sleep(1)
         print '1',

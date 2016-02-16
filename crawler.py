@@ -2,6 +2,7 @@
 
 import random
 import time
+import logging
 
 import MySQLdb
 
@@ -18,13 +19,10 @@ class WeiboCrawler:
     MYSQL_CHARSET = 'utf8mb4'
 
     def __init__(self,
-                 keyword,
-                 pages=None,
                  isConnectMySQL=False,
                  htmlOutputDir=''):
-
-        self._keyword = keyword
-        self._pages = pages
+        self._keywords = None
+        self._pages = None
         self._htmlOutputDir = htmlOutputDir
         self._isConnectMySQL = isConnectMySQL
         self._conn = None
@@ -42,32 +40,28 @@ class WeiboCrawler:
                 use_unicode=False)
             print u'连入数据库'
 
-    def crawl(self):
-        if self._pages is None:
-            self._crawl_unlimited()
+    # def search(self, keywords, pages):
+    #     if type(keywords) is str:
+    #         self._search_keyword(keywords)
+    #     elif type(keywords) is list:
+    #         for keyword in keywords:
+    #             self._search_keyword(keyword)
+    #     else:
+    #         print 'Keywords TypeError'
+
+    def search(self, keywords, pages=range(1,51)):
+        if type(keywords) is str:
+            for page in pages:
+                downloader = WeiboDownloader(keywords, page, self._conn, self._htmlOutputDir).load().retrieve()
+                self.hasResult = downloader.hasResult
+                if self.hasResult:
+                    sec = random.uniform(5, 15)
+                    print '随机睡眠' + str(sec) + '秒\n'
+                    time.sleep(sec)
+                else:
+                    break
+        elif type(keywords) is list:
+            for keyword in keywords:
+                self.search(keyword, pages)
         else:
-            self._crawl_pages()
-
-    def _crawl_unlimited(self):
-        page = 1
-        while self.hasResult:
-            downloader = WeiboDownloader(self._keyword, page, self._conn, self._htmlOutputDir).load().retrieve()
-            self.hasResult = downloader.hasResult
-            page += 1
-            if self.hasResult:
-                sleep()
-
-    def _crawl_pages(self):
-        for page in self._pages:
-            downloader = WeiboDownloader(self._keyword, page, self._conn, self._htmlOutputDir).load().retrieve()
-            self.hasResult = downloader.hasResult
-            if self.hasResult:
-                sleep()
-            else:
-                break
-
-
-def sleep():
-    sec = random.uniform(5, 15)
-    print '随机睡眠' + str(sec) + '秒\n'
-    time.sleep(sec)
+            print 'Keywords TypeError, please enter str or list.'

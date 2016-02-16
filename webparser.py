@@ -4,31 +4,48 @@ import json
 import re
 import sys
 
-import bs4
+import _mysql_exceptions
 from bs4 import BeautifulSoup
+
+from webparser_search import parse_search_cardwrap, search_noresult
 
 reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-class TopicParser:
+class SearchParser:
+    """
+    Parse html of Sina weibo search result
+    :param website: html
+
+    :return weibos: list of BeautifulSoup of parsed weibo
+    :return errors: list of caught errors during parsing html
+    """
 
     PATTERN = re.compile('<script>STK && STK.pageletM && STK.pageletM.view\((.*)\)</script>', re.MULTILINE)
+    PATTERN_KEYWORD_IN_TITLE = re.compile(' - (.+?) - ')
 
     def __init__(self, website):
-        self.hasResult = not isNoResult(website)
-        self._weibosSoup = self.getWeibosSoup(website)
+        self._website = website
+        self._title = BeautifulSoup(website, 'html.parser').head.title.string
+        self._keyword = self.PATTERN_KEYWORD_IN_TITLE.search(self._title).group(1)
+        self.hasResult = not search_noresult(website)
         self.weibos = []
 
-    def retrieve(self):
+        if '#' in self._keyword:
+            self._table = 'topic_' + re.sub('#', '', self._keyword)
+        elif '@' in self._keyword:
+            self._table = 'topic_' + re.sub('@', '', self._keyword)
+        else:
+            print u'Wrong search keyword'
+
+    def parse(self):
         if self.hasResult:
-            for weiboSoup in self._weibosSoup:
-                weibo = getInfo(weiboSoup)
-                if weibo is not None:
-                    self.weibos.append(weibo)
+            for weibo in self.get_cardwrap(self._website):
+                self.weibos.append(parse_search_cardwrap(weibo))
         return self
 
-    def getWeibosSoup(self, website):
+    def get_cardwrap(self, website):
         if self.hasResult:
             for block in self.PATTERN.findall(website):
                 block_json = json.loads(block)
@@ -36,77 +53,44 @@ class TopicParser:
                     return BeautifulSoup(block_json['html'], 'html.parser') \
                         .find_all('div', class_='WB_cardwrap S_bg2 clearfix')
 
+    def toMySQL(self, conn):
+        print u'\t表格录入中...'
+        cursor = conn.cursor()
+        cursor._defer_warnings = True
+        command_create = 'CREATE TABLE IF NOT EXISTS ' + self._table + \
+                         '(mid CHAR(16), ' \
+                         'weibo VARCHAR(255), ' \
+                         'uid CHAR(10), ' \
+                         'nick VARCHAR(40), ' \
+                         'forwards INT UNSIGNED DEFAULT 0, ' \
+                         'comments INT UNSIGNED DEFAULT 0, ' \
+                         'likes INT UNSIGNED DEFAULT 0, ' \
+                         'time DATETIME DEFAULT NULL, ' \
+                         'via VARCHAR(140), ' \
+                         'isforward INT(1) DEFAULT 0, ' \
+                         'forwarduid VARCHAR(10) DEFAULT NULL, ' \
+                         'forwardmid VARCHAR(16) DEFAULT NULL, ' \
+                         'UNIQUE (mid))'  # keep mid unique
+        cursor.execute(command_create)
 
-def getInfo(weibo):
-    out = dict()
-    out['raw'] = weibo
-    out['mid'] = weibo.find(has_mid).attrs['mid']
-    try:
-        out['isforward'] = weibo.find(has_isforward)['isforward']
-        forward = weibo.find('div', class_='comment')
-        out['forwarduid'] = forward.find('div', class_='comment_info').div.a.attrs['usercard'].split('=')[1]
-        out['forwardmid'] = forward.find('div', class_='feed_action clearfix W_fr').find_all('li')[2].a.attrs['action-data'].split('=')[1]
-    except TypeError:
-        out['isforward'] = u'0'
-        out['forwarduid'] = ''
-        out['forwardmid'] = ''
-
-    # content
-    weiboDetails = weibo.find('div', class_='feed_content wbcon')
-    userInfo = weiboDetails.a.attrs
-    out['nick'] = userInfo['nick-name']
-    out['uid'] = userInfo['usercard'].split('&')[0].split('=')[1]
-    out['weibo'] = parseWeibo(weiboDetails.p)
-    # date time via
-    weiboFroms = weibo.find_all('div', class_='feed_from W_textb')[-1]
-    out['datetime'] = weiboFroms.a.attrs['title']
-    out['via'] = re.sub(u'.+? (来自|via) | +$|\n', '', weiboFroms.text)
-
-    # number of forwards comments and likes
-    try:
-        weiboActions = weibo.find_all('div', 'feed_action clearfix')[-1].find_all('span', class_='line S_line1')
-        forwards = re.sub(u'转发| |"', '', weiboActions[1].text)
-        comments = re.sub(u'评论| |"', '', weiboActions[2].text)
-        likes = weiboActions[3].text
-        out['forwards'] = u'0' if forwards == u'' else forwards
-        out['comments'] = u'0' if comments == u'' else comments
-        out['likes'] = u'0' if likes == u'' else likes
-    except IndexError:
-        out['forwards'] = u'0'
-        out['comments'] = u'0'
-        out['likes'] = u'0'
-        print '\t微博 ' + out['mid'] + ' feed_action部分缺失,请检查是否均为0.'
-    return out
-
-
-def parseWeibo(weibo):
-    content = ''
-    for child in weibo.children:
-        if type(child) == bs4.element.NavigableString:
-            line = child.string.encode('unicode-escape')
-            line = re.sub('\\\\[a-zA-Z0-9]{9}', '', line).decode('unicode-escape')  # remove emoji
-            line = re.sub('"', '\\"', line)
-            content += line
-        elif type(child) == bs4.element.Tag:
-            if 'http' not in child.text:
-                content += child.text
-            # add face into content
-            if child.text == '' and child.has_attr('type') and child['type'] == 'face':
-                content += ' ' + child.attrs['title'] + ' '
-        else:
-            print 'Unexpected Beautifulsoup type in \n' + weibo.text
-    content = re.sub(' +', ' ', content)
-    return re.sub('\n|\t', '', content)
-
-
-def isNoResult(website):
-    p = re.compile('<div class=\\\\"(.+?)\\\\">')
-    return 'search_noresult' in p.findall(website)
-
-
-def has_mid(tag):
-    return tag.has_attr('mid')
-
-
-def has_isforward(tag):
-    return tag.has_attr('isforward')
+        for weibo in self.weibos:
+            command_insert = \
+                'INSERT INTO ' + self._table + \
+                '(mid, weibo, uid, nick, forwards, comments, likes, time, via, isforward, forwarduid, forwardmid)' \
+                ' VALUES("%s", "%s", "%s", "%s", %s, %s, %s, "%s", "%s", %s, "%s", "%s");' % \
+                (weibo['mid'], weibo['weibo'], weibo['uid'],
+                 weibo['nick'], weibo['forwards'], weibo['comments'],
+                 weibo['likes'], weibo['datetime'], weibo['via'],
+                 weibo['isforward'], weibo['forwarduid'], weibo['forwardmid'])
+            try:
+                cursor.execute(command_insert)
+                print '\t微博' + weibo['mid'] + '已录入.'
+            except _mysql_exceptions.OperationalError, e:
+                print e[1]
+            except _mysql_exceptions.IntegrityError:
+                print '\t微博' + weibo['mid'] + '已存在.'
+            except _mysql_exceptions.ProgrammingError:
+                print command_insert
+                print 'SQL command error'
+        conn.commit()
+        return self
