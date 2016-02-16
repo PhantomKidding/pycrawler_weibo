@@ -1,6 +1,7 @@
-
 *.pyc
-
 .idea
-
 main.py
+pic
+.gitignore.swp
+
+*.template
