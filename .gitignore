@@ -1,6 +1,6 @@
 
 *.pyc
 
-*.xml
+.idea
 
-*.iml
+main.py
