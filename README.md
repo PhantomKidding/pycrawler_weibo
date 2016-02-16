@@ -21,7 +21,8 @@ At the time, pycrawler_weibo only supports crawling on searching certain keyword
     `python __init__.py`
 
 ### Clases
-- class  WeiboCrawler(isConnectMySQL=True, htmlOutputDir='')
-  - def search(keyword, pages=range(1, 51))
-    - param keyword: (str/list) search keyword
-    - param pages:   (int/list) pages of search
+- *class* WeiboCrawler(isConnectMySQL=True, htmlOutputDir='')
+  - *def* search(keyword, pages=range(1, 51))
+    - *param* keyword: (str/list) search keyword
+    - *param* pages:   (int/list) pages of search
+  
