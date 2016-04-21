@@ -16,7 +16,7 @@ sys.setdefaultencoding('utf8')
 class SearchParser:
     """
     Parse html of Sina weibo search result
-    :param website: html
+    :param website: (str) html
 
     :return weibos: list of BeautifulSoup of parsed weibo
     :return errors: list of caught errors during parsing html

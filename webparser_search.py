@@ -8,13 +8,8 @@ from webparser_general import *
 
 def parse_search_cardwrap(weibo):
     """
-    :param weibo: a block of a weibo
-    :type weibo: BeautifulSoup
-
-    :return out: weibo info
-    :return err: caught errors when parsing
-    :rtype out: dictionary
-    :rtype err: dictionary
+    :param weibo: (BeautifulSoup) a block of a weibo
+    :return out: (dictionary) weibo info
     """
     out = dict()
     out['raw'] = weibo
